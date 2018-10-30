@@ -78,7 +78,7 @@ def next_batch(batch_size,file_num,filename,dataset = 'ixmas'):
       return batch,y,file_num,epoch_completed
 
 
-def next_feature_batch(batch_size,file_num,filename,dataset = 'IXMAS',frame_dim = 5):
+def next_feature_batch(batch_size,file_num,filename,dataset = 'ixmas',frame_dim = 5):
   global _VIDEO_FRAMES
   dataset_root = '../dataset/{}/mixed_5b_features/'.format(dataset)
   epoch_completed = False
@@ -124,3 +124,21 @@ def next_feature_batch(batch_size,file_num,filename,dataset = 'IXMAS',frame_dim 
     if batch.shape[0]==batch_size: 
       file_num = i
       return batch,y,file_num,epoch_completed
+
+def load_a_feature(filename,dataset,frame_dim = 8):
+  y = filename.split('/')[0]
+  dataset_root = '../dataset/{}/mixed_5b_features/'.format(dataset)
+  sample = np.load(os.path.join(dataset_root,filename))
+  frames = sample.shape[1]
+  if frame_dim ==0:
+    if frames < 8:
+      frame_dim = 8
+    else:
+      return sample,y
+  while frames< frame_dim: 
+    frames = sample.shape[1]
+    sample = np.concatenate((sample,sample[:,0:min(frames,frame_dim-frames),:,:,:]),axis=1)
+  extra = frames- frame_dim
+  start = np.random.randint(0,high=extra+1)
+  feature = sample[:,start:start+frame_dim,:,:]
+  return feature,y

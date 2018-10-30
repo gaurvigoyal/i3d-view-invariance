@@ -69,11 +69,15 @@ def main(unused_argv):
           use_bias = True,
           trainable = True,
           name = 'FullyConnected1')
-        rgb_logits = tf.layers.dense(rgb_net, _NUM_CLASSES,
+        bn = snt.BatchNorm()
+        rgb_net = bn(rgb_net, is_training=False, test_local_stats=False)
+        rgb_net = tf.layers.dense(rgb_net, _NUM_CLASSES,
           activation = tf.nn.relu,
           use_bias = True,
           trainable = True,
           name = 'FullyConnected2')
+        bn = snt.BatchNorm()
+        rgb_logits = bn(rgb_net, is_training=False, test_local_stats=False)
      # with tf.variable_scope(end_point):
       #   rgb_net = tf.nn.avg_pool3d(rgb_net, ksize=[1, 2, 7, 7, 1],
       #                          strides=[1, 1, 1, 1, 1], padding=snt.VALID)
@@ -121,16 +125,20 @@ def main(unused_argv):
           use_bias = True,
           trainable = True,
           name = 'FullyConnected1')
-        # flow_net = tf.nn.avg_pool3d(flow_net, ksize=[1, 2, 7, 7, 1],
+        bn = snt.BatchNorm()
+        flow_net = bn(flow_net, is_training=False, test_local_stats=False)
+         # flow_net = tf.nn.avg_pool3d(flow_net, ksize=[1, 2, 7, 7, 1],
                                # strides=[1, 1, 1, 1, 1], padding=snt.VALID)
         # if TRAINING:
         #     flow_net = tf.nn.dropout(flow_net, 0.7)
-        flow_logits = tf.layers.dense(flow_net, _NUM_CLASSES,
+        flow_net = tf.layers.dense(flow_net, _NUM_CLASSES,
           activation = tf.nn.relu,
           use_bias = True,
           trainable = True,
           name = 'FullyConnected2')
-        # logits = i3d.Unit3D(output_channels=_NUM_CLASSES,
+        bn = snt.BatchNorm()
+        flow_logits = bn(flow_net, is_training=False, test_local_stats=False)
+         # logits = i3d.Unit3D(output_channels=_NUM_CLASSES,
         #                 kernel_shape=[1, 1, 1],
         #                 activation_fn=None,
         #                 use_batch_norm=False,

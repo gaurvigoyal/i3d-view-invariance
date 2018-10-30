@@ -130,7 +130,7 @@ def main(unused_argv):
       flow_net, _ = flow_model(
         model_input, 
         is_training=True, 
-        dropout_keep_prob=0.5)
+        dropout_keep_prob=0.8)
     model_logits = flow_net
 
     flow_variable_map = {}
@@ -227,19 +227,19 @@ def main(unused_argv):
           save_path = model_saver.save(sess,'../results/checkpoints/{}/{}_{}_{}/Epoch_{}.ckpt'.format(classifier,eval_type,split,_graph_num,current_epoch))
         # save_path = model_saver.save(sess,'checkpoints/'+eval_type+'_'+split+'_'+str(_graph_num)+'/Epoch_'+str(current_epoch)+'.ckpt')
           # print('Total time taken from the beginning of the program: {} seconds'.format(time.time()-initial_start))
+          current_epoch +=1
         else:
           beginning = False
         if current_epoch == initial_epoch+1:
           with open(result_file, 'a') as f:
             f.write('First Epoch completed in {} seconds.\n'.format(time.time()-initial_start))
-        current_epoch +=1
         # steps_in_epoch = 1
-        file_num=0
 
     ############################################
 	  ############# Validation ###################
 	  ############################################
       
+        file_num=0
         tester=1
         file_num_val =0
         top1_result_vector_train = []
@@ -336,15 +336,17 @@ def main(unused_argv):
         if int(best_accuracies['val'])< top1_accuracy_total:
           best_accuracies['val'] = top1_accuracy_total
           best_accuracies['val_epoch'] = current_epoch
+        print('Validation completed. Epoch saved.')
+
       if len(train_loss)>10 and np.linalg.norm(train_loss[-6:-1]- train_loss[-5:])<0.001:
-      	break
+      	with open(result_file,'a') as f:
+          f.write('Validation accuracy stabalized at epoch {}'.format(epoch))
     with open(result_file, 'a') as f:
       f.write('Best training accuracy: {} at epoch: {}.\n'.format(best_accuracies['train'],best_accuracies['train_epoch']))
       f.write('Best validation accuracy: {} at epoch: {}.\n'.format(best_accuracies['val'],best_accuracies['val_epoch']))
     # with open('out/'+split+'_accuracies.pkl',"wb") as f2:
     acc = ([int(best_accuracies['train']),int(best_accuracies['val'])])
     np.save('../results/out/{}/accuracies_{}.npy'.format(classifier,split),acc)
-    print('Validation completed. Epoch saved.')
 
 if __name__ == '__main__':
   tf.app.run(main)

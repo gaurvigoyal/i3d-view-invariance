@@ -65,12 +65,14 @@ def main(unused_argv):
         # if TRAINING:
         #     flow_net = tf.nn.dropout(flow_net, 0.7)
         rgb_net = tf.layers.flatten(rgb_net, name = 'Flatten')
-        rgb_logits = tf.layers.dense(rgb_net, _NUM_CLASSES,
+        rgb_net = tf.layers.dense(rgb_net, _NUM_CLASSES,
           activation = tf.nn.relu,
           use_bias = True,
           trainable = True,
           name = 'FullyConnected')
-     # with tf.variable_scope(end_point):
+        bn = snt.BatchNorm()
+        rgb_logits = bn(rgb_net, is_training=False, test_local_stats=False)
+      # with tf.variable_scope(end_point):
       #   rgb_net = tf.nn.avg_pool3d(rgb_net, ksize=[1, 2, 7, 7, 1],
       #                          strides=[1, 1, 1, 1, 1], padding=snt.VALID)
       #   if TRAINING:
@@ -116,12 +118,14 @@ def main(unused_argv):
         # if TRAINING:
         #     flow_net = tf.nn.dropout(flow_net, 0.7)
         flow_net = tf.layers.flatten(flow_net, name = 'Flatten')
-        flow_logits = tf.layers.dense(flow_net, _NUM_CLASSES,
+        flow_net = tf.layers.dense(flow_net, _NUM_CLASSES,
           activation = tf.nn.relu,
           use_bias = True,
           trainable = True,
           name = 'FullyConnected')
-        # logits = i3d.Unit3D(output_channels=_NUM_CLASSES,
+        bn = snt.BatchNorm()
+        flow_logits = bn(flow_net, is_training=False, test_local_stats=False)
+         # logits = i3d.Unit3D(output_channels=_NUM_CLASSES,
         #                 kernel_shape=[1, 1, 1],
         #                 activation_fn=None,
         #                 use_batch_norm=False,
@@ -160,14 +164,12 @@ def main(unused_argv):
 
     if eval_type == 'rgb':
       rgb_saver.restore(sess, _CHECKPOINT_PATHS['rgb_imagenet'])
-      sess.run(rgb_variable_map_to_initialize[0].initializer)
-      sess.run(rgb_variable_map_to_initialize[1].initializer)
-      # print(type(rgb_variable_map_to_initialize[0]))
-      # print(tf.is_variable_initialized(rgb_variable_map_to_initialize[0]))
+      for variable in rgb_variable_map_to_initialize:
+        sess.run(variable.initializer)
     if eval_type =='flow':
       flow_saver.restore(sess, _CHECKPOINT_PATHS['flow_imagenet'])
-      sess.run(flow_variable_map_to_initialize[0].initializer)
-      sess.run(flow_variable_map_to_initialize[1].initializer)
+      for variable in flow_variable_map_to_initialize:
+        sess.run(variable.initializer)
 
     utils.ensure_dir('../results/checkpoints/{}5/model_firstckpt_{}'.format(dataset,eval_type))
     save_path = model_saver.save(sess,'../results/checkpoints/{}5/model_firstckpt_{}/model.ckpt'.format(dataset,eval_type))

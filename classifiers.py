@@ -12,23 +12,14 @@ def exp6(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
     net = tf.layers.flatten(net, name = 'Flatten')
     net = tf.nn.dropout(net, dropout_keep_prob)
     net = tf.layers.dense(net,inception3d._num_classes,
-      activation = tf.nn.relu,
+      activation = None,
+      # activation = tf.nn.relu,
       use_bias = True,
       trainable = is_training,
       name = 'FullyConnected2')
-  end_points[end_point] = net
-  if inception3d._final_endpoint == end_point: return net, end_points
+    bn = snt.BatchNorm()
+    net = bn(net, is_training=is_training, test_local_stats=False)
 
-def tests(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
-  end_point = 'Logits'
-  with tf.variable_scope((end_point)):
-    net = tf.layers.flatten(net, name = 'Flatten')
-    net = tf.nn.dropout(net, dropout_keep_prob)
-    net = tf.layers.dense(net,inception3d._num_classes,
-      activation = tf.nn.relu,
-      use_bias = True,
-      trainable = is_training,
-      name = 'FullyConnected2')
   end_points[end_point] = net
   if inception3d._final_endpoint == end_point: return net, end_points
 
@@ -90,13 +81,13 @@ def exp5(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
                         name='Conv3d_0a_1x1')(net, is_training=is_training)
     with tf.variable_scope('Branch_1'):
       branch_1 = Unit3D(output_channels=192, kernel_shape=[1, 1, 1],
-                        name='Conv3d_0a_1x1')(net, is_training=is_training)
+                        name='Conv3d_0a_1x1')(net, is_training=False)
       branch_1 = Unit3D(output_channels=384, kernel_shape=[3, 3, 3],
                         name='Conv3d_0b_3x3')(branch_1,
                                               is_training=is_training)
     with tf.variable_scope('Branch_2'):
       branch_2 = Unit3D(output_channels=48, kernel_shape=[1, 1, 1],
-                        name='Conv3d_0a_1x1')(net, is_training=is_training)
+                        name='Conv3d_0a_1x1')(net, is_training=False)
       branch_2 = Unit3D(output_channels=128, kernel_shape=[3, 3, 3],
                         name='Conv3d_0b_3x3')(branch_2,
                                               is_training=is_training)
@@ -118,10 +109,13 @@ def exp5(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
     net = tf.layers.flatten(net, name = 'Flatten')
     net = tf.nn.dropout(net, dropout_keep_prob)
     net = tf.layers.dense(net,inception3d._num_classes,
-        activation = tf.nn.relu,
+        activation = None,
+        # activation = tf.nn.relu,
         use_bias = True,
         trainable = is_training,
-        name = 'FullyConnected')        
+        name = 'FullyConnected')
+    bn = snt.BatchNorm()
+    net = bn(net, is_training=is_training, test_local_stats=False)                
   end_points[end_point] = net
   if inception3d._final_endpoint == end_point: return net, end_points
 
@@ -134,12 +128,17 @@ def exp7(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
       use_bias = True,
       trainable = is_training,
       name = 'FullyConnected1')
+    bn = snt.BatchNorm()
+    net = bn(net, is_training=is_training, test_local_stats=False)
+
     net = tf.nn.dropout(net, dropout_keep_prob)
     net = tf.layers.dense(net,inception3d._num_classes,
-      activation = tf.nn.relu,
+      activation = None,
       use_bias = True,
       trainable = is_training,
       name = 'FullyConnected2')
+    bn = snt.BatchNorm()
+    net = bn(net, is_training=is_training, test_local_stats=False)
   end_points[end_point] = net
   if inception3d._final_endpoint == end_point: return net, end_points
 
@@ -182,11 +181,13 @@ def exp8(inception3d, net, end_points, inputs, is_training, dropout_keep_prob):
       use_bias = True,
       trainable = is_training,
       name = 'FullyConnected1')
+    bn = snt.BatchNorm()
+    net = bn(net, is_training=is_training, test_local_stats=False)
     # net = tf.nn.avg_pool3d(net, ksize=[1, 2, 7, 7, 1],
                            # strides=[1, 1, 1, 1, 1], padding=snt.VALID)
     net = tf.nn.dropout(net, dropout_keep_prob)
     net = tf.layers.dense(net,self._num_classes,
-      activation = tf.nn.relu,
+      activation = None,
       use_bias = True,
       trainable = is_training,
       name = 'FullyConnected2')
